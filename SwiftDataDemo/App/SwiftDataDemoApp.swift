@@ -8,15 +8,8 @@
 import SwiftUI
 import SwiftData
 
-private struct TaskActorEnvironmentKey: EnvironmentKey {
-    static let defaultValue: IssueModelActor? = nil
-}
-
 extension EnvironmentValues {
-    var issueModelActor: IssueModelActor? {
-        get { self[TaskActorEnvironmentKey.self] }
-        set { self[TaskActorEnvironmentKey.self] = newValue }
-    }
+    @Entry var issueModelActor: IssueModelActor?
 }
 
 @main
