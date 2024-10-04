@@ -12,6 +12,7 @@ import os.log
 @ModelActor
 actor IssueModelActor {
     let poi = OSSignposter(subsystem: "IssueModelActor", category: .pointsOfInterest)
+    let count = 1000
 
     func insert() async throws {
         let state = poi.beginInterval(#function, id: poi.makeSignpostID())
@@ -19,12 +20,8 @@ actor IssueModelActor {
 
         let issueId = try insertIssue(name: "MA - Issue: \(Date.now.timeIntervalSince1970)")
 
-        try await withThrowingDiscardingTaskGroup { group in
-            for i in 1...15 {
-                group.addTask { [self] in
-                    try await insertSubissue(name: "\(i)", issueId: issueId)
-                }
-            }
+        for i in 1...count {
+            try insertSubissue(name: "\(i)", issueId: issueId)
         }
 
         try save()
@@ -42,8 +39,8 @@ actor IssueModelActor {
 private extension IssueModelActor {
     @discardableResult
     func insertIssue(name: String) throws -> PersistentIdentifier {
-        let state = poi.beginInterval(#function, id: poi.makeSignpostID())
-        defer { poi.endInterval(#function, state) }
+        // let state = poi.beginInterval(#function, id: poi.makeSignpostID())
+        // defer { poi.endInterval(#function, state) }
 
         let issue = Issue(name: name)
         modelContext.insert(issue)
@@ -53,21 +50,20 @@ private extension IssueModelActor {
 
     @discardableResult
     func insertSubissue(name: String, issueId: PersistentIdentifier) throws -> PersistentIdentifier {
-        let state = poi.beginInterval(#function, id: poi.makeSignpostID())
-        defer { poi.endInterval(#function, state) }
+        // let state = poi.beginInterval(#function, id: poi.makeSignpostID())
+        // defer { poi.endInterval(#function, state) }
 
         guard let issue = modelContext.model(for: issueId) as? Issue else {
             throw IssueModelActorError.issueNotFound
         }
         let subissue = Subissue(name: name, issue: issue)
         modelContext.insert(subissue)
-        try modelContext.save()
         return subissue.persistentModelID
     }
 
     func save() throws {
-        let state = poi.beginInterval(#function, id: poi.makeSignpostID())
-        defer { poi.endInterval(#function, state) }
+        // let state = poi.beginInterval(#function, id: poi.makeSignpostID())
+        // defer { poi.endInterval(#function, state) }
 
         try modelContext.save()
     }

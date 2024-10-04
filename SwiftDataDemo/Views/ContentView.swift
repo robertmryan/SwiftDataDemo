@@ -17,15 +17,9 @@ struct ContentView: View {
 
     @Query var allIssues: [Issue]
     @State var selectedIssue: Issue?
-    @Query var allSubissues: [Subissue]
 
     @State var didTapInsert = false
     @State var didTapDeleteAll = false
-
-//    init(refreshViewID: Binding<UUID>) {
-//        _refreshViewID = refreshViewID
-//        backgroundClass = BackgroundClass(modelContainer: modelContext.container)
-//    }
 
     var body: some View {
         VStack {
@@ -35,7 +29,7 @@ struct ContentView: View {
 
                     VStack {
                         Text("Issue Count: \(allIssues.count)")
-                        Text("SubIssue Count: \(allSubissues.count)")
+                        Text("SubIssue Count: \(subissueCount())")
                     }
 
                     Spacer()
@@ -59,6 +53,7 @@ struct ContentView: View {
                     } label: {
                         Text("Insert")
                     }
+                    .disabled(didTapInsert || didTapDeleteAll)
 
                     Spacer()
 
@@ -67,7 +62,8 @@ struct ContentView: View {
                     } label: {
                         Text("Delete All")
                     }
-                    
+                    .disabled(didTapInsert || didTapDeleteAll)
+
                     Spacer()
                 }
             }
@@ -92,19 +88,7 @@ struct ContentView: View {
                 }
 
                 if let selectedIssue {
-                    List(selectedIssue.subissues) { subIssue in
-                        HStack {
-                            Spacer()
-                            Text(subIssue.name).bold()
-                            Spacer()
-                            if subIssue.numberEdited > 0 {
-                                Text("Edited: \(subIssue.numberEdited)").bold()
-                            } else {
-                                Text("Edited: \(subIssue.numberEdited)").tint(.secondary)
-                            }
-                            Spacer()
-                        }
-                    }
+                    SubissuesView(issue: selectedIssue)
                 } else {
                     Text("Please select an issue to see the subissues involved.")
                         .multilineTextAlignment(.center)
@@ -140,6 +124,11 @@ struct ContentView: View {
 
             didTapDeleteAll = false
         }
+    }
+
+    func subissueCount() -> Int {
+        let count = try? modelContext.fetchCount(FetchDescriptor<Subissue>())
+        return count ?? 0
     }
 }
 
